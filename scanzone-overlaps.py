@@ -1,6 +1,8 @@
-#!/usr/bin/python
+#!python
 # Written by: James Smith
 # Version: 1.0
+#
+# Updated: November 28, 2018
 # Created: June 13, 2017
 #
 # Version 1.0 - confirmed working with Python 3.x
@@ -17,11 +19,13 @@
 #
 #
 # Requires the following:
-#   pip install pysecuritycenter
-#   pip install ipaddr
-#   pip install netaddr
+#   pip install pytenable ipaddr netaddr
 
-from securitycenter import SecurityCenter5
+try:
+	from securitycenter import SecurityCenter5
+except:
+	print("Unable to load SecurityCenter5 from securitycenter library.  Either the pySecurityCenter module is not installed or there is a conflicting Python module installed.  Check \"pip list\" for conflicts and remove them, then uninstall and reinstall pySecurityCenter.")
+	exit(-1)
 import ipaddr
 import json
 import netaddr
@@ -114,34 +118,54 @@ if os.getenv('SCPASSWORD') is None:
 else:
 	password = os.getenv('SCPASSWORD')
 
-if args.host[0] != "":
-	schost=args.host[0]
-if args.port[0] != "":
-	scport=args.port[0]
-if args.username[0] != "":
-	username=args.username[0]
-if args.password[0] != "":
-	password=args.password[0]
+try:
+	if args.host[0] != "":
+		schost=args.host[0]
+except:
+	#Just a NOP
+	x=0
 
+try:
+	if args.port[0] != "":
+		scport=args.port[0]
+except:
+	#Just a NOP
+ 	x=0
 
+try:
+	if args.username[0] != "":
+		username=args.username[0]
+except:
+	# Just a NOP
+	x = 0
 
+try:
+	if args.password[0] != "":
+		password=args.password[0]
+except:
+	# Just a NOP
+	x = 0
 
 if schost == "":
 	print("No SecurityCenter host specified.  Please supply in the environment variables or command line.")
+if username == "":
+	print("No SecurityCenter admin username specified.  Please supply in the environment variables or command line.")
+if password == "":
+	print("No SecurityCenter admin password specified.  Please supply in the environment variables or command line.")
 
 # Create a session as the user
 try:
 	scconn = SecurityCenter5(schost,port=scport)
 except:
 	print("Unable to connect to SecurityCenter")
-	print("Make sure to set SCHOST, SCUSERNAME, and SCPASSWORD environment variables and export them.  Optionally there is an SCPORT variable as well.")
+	print("Make sure to set SCHOST, SCUSERNAME, and SCPASSWORD environment variables and export them.  Optionally there is an SCPORT variable as well.  You can also provide variables by command line.")
 	exit(-1)
 
 try:
 	scconn.login(username, password)
 except:
 	print("Unable to log into SecurityCenter")
-	print("Make sure to set SCHOST, SCUSERNAME, and SCPASSWORD environment variables and export them.  Optionally there is an SCPORT variable as well.")
+	print("Make sure to set SCHOST, SCUSERNAME, and SCPASSWORD environment variables and export them.  Optionally there is an SCPORT variable as well.  You can also provide variables by command line.")
 
 print("Logged into SecurityCenter")
 checkScanZones(scconn)
